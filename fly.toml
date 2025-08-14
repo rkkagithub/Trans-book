@@ -1,0 +1,33 @@
+app = "transbook"
+primary_region = "iad"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  REPL_ID = "cloud-deployment"
+  ISSUER_URL = "https://replit.com/oidc"
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "10s"
+  grace_period = "5s"
+  method = "GET"
+  path = "/api/health"
+
+[machines]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "transbook_data"
+  destination = "/data"

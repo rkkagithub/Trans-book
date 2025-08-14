@@ -1,8 +1,11 @@
-# Multi-stage build for TransBook webapp
+# Multi-stage build for TransBook webapp - Cloud Deployment Ready
 FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Copy package files
 COPY package*.json ./
@@ -18,6 +21,9 @@ RUN npm run build
 
 # Production image
 FROM node:20-alpine AS runner
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Set working directory
 WORKDIR /app
@@ -44,17 +50,16 @@ COPY --from=builder /app/shared ./shared
 RUN chown -R transbook:nodejs /app
 USER transbook
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Dynamic port binding for cloud platforms
+EXPOSE $PORT
 
-# Environment variables
+# Environment variables with cloud-friendly defaults
 ENV NODE_ENV=production
-ENV PORT=5000
 ENV HOST=0.0.0.0
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-5000}/api/health || exit 1
 
 # Start the application
 CMD ["npm", "start"]
