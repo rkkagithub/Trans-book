@@ -1,0 +1,35 @@
+services:
+  # Web Service
+  - type: web
+    name: transbook-app
+    env: docker
+    dockerfilePath: ./Dockerfile.render
+    plan: free
+    region: oregon
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: transbook-postgres
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: REPLIT_DOMAINS
+        sync: false
+      - key: REPL_ID
+        value: render-production
+      - key: ISSUER_URL
+        value: https://replit.com/oidc
+
+  # PostgreSQL Database
+databases:
+  - name: transbook-postgres
+    databaseName: transbook
+    user: transbook
+    region: oregon
+    plan: free
