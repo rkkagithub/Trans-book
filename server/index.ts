@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +36,20 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Import production utilities or Vite based on environment
+  let setupVite: any, serveStatic: any, log: any;
+
+  if (process.env.NODE_ENV === "production") {
+    const production = await import("./production.js");
+    serveStatic = production.serveStatic;
+    log = production.log;
+  } else {
+    const vite = await import("./vite.js");
+    setupVite = vite.setupVite;
+    serveStatic = vite.serveStatic;
+    log = vite.log;
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

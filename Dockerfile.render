@@ -19,8 +19,7 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Remove dev dependencies after build
-RUN npm prune --production
+# Don't remove dev dependencies as they're needed for production server
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
