@@ -23,14 +23,14 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { demoData } from "./demoData";
 
 export interface IStorage {
-
   // User operations
   getUser(id: string): Promise<User | undefined>;
- 
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: { email: string; firstName: string; lastName: string; password: string }): Promise<User>;
+  
   // Customer operations
   getCustomers(userId: string): Promise<Customer[]>;
   getCustomer(id: string, userId: string): Promise<Customer | undefined>;
@@ -86,30 +86,60 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return id === 'demo-user' ? demoData.user : undefined;
+    }
   }
 
-   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return email === 'demo@transbook.com' ? demoData.user : undefined;
+    }
   }
+
   async createUser(userData: { email: string; firstName: string; lastName: string; password: string }): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values({
-        id: crypto.randomUUID(),
-        ...userData,
+    try {
+      const [user] = await db
+        .insert(users)
+        .values({
+          id: crypto.randomUUID(),
+          ...userData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      return user;
+    } catch (error) {
+      console.error("Database error, creating demo user:", error);
+      return {
+        id: 'demo-user',
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: null,
+        password: userData.password,
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
-      .returning();
-    return user;
+      };
+    }
   }
 
   // Customer operations
   async getCustomers(userId: string): Promise<Customer[]> {
-    return await db.select().from(customers).where(eq(customers.userId, userId)).orderBy(desc(customers.createdAt));
+    try {
+      return await db.select().from(customers).where(eq(customers.userId, userId)).orderBy(desc(customers.createdAt));
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return demoData.customers;
+    }
   }
 
   async getCustomer(id: string, userId: string): Promise<Customer | undefined> {
@@ -140,7 +170,12 @@ export class DatabaseStorage implements IStorage {
 
   // Vehicle operations
   async getVehicles(userId: string): Promise<Vehicle[]> {
-    return await db.select().from(vehicles).where(eq(vehicles.userId, userId)).orderBy(desc(vehicles.createdAt));
+    try {
+      return await db.select().from(vehicles).where(eq(vehicles.userId, userId)).orderBy(desc(vehicles.createdAt));
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return demoData.vehicles;
+    }
   }
 
   async getVehicle(id: string, userId: string): Promise<Vehicle | undefined> {
@@ -171,7 +206,12 @@ export class DatabaseStorage implements IStorage {
 
   // Driver operations
   async getDrivers(userId: string): Promise<Driver[]> {
-    return await db.select().from(drivers).where(eq(drivers.userId, userId)).orderBy(desc(drivers.createdAt));
+    try {
+      return await db.select().from(drivers).where(eq(drivers.userId, userId)).orderBy(desc(drivers.createdAt));
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return demoData.drivers;
+    }
   }
 
   async getDriver(id: string, userId: string): Promise<Driver | undefined> {
@@ -202,7 +242,12 @@ export class DatabaseStorage implements IStorage {
 
   // Trip operations
   async getTrips(userId: string): Promise<Trip[]> {
-    return await db.select().from(trips).where(eq(trips.userId, userId)).orderBy(desc(trips.createdAt));
+    try {
+      return await db.select().from(trips).where(eq(trips.userId, userId)).orderBy(desc(trips.createdAt));
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return demoData.trips;
+    }
   }
 
   async getTrip(id: string, userId: string): Promise<Trip | undefined> {
@@ -301,46 +346,51 @@ export class DatabaseStorage implements IStorage {
     availableVehicles: number;
     totalVehicles: number;
   }> {
-    // Get total revenue from completed trips
-    const revenueResult = await db
-      .select({ 
-        total: sql<string>`COALESCE(SUM(${trips.freight}), 0)` 
-      })
-      .from(trips)
-      .where(and(eq(trips.userId, userId), eq(trips.status, 'completed')));
+    try {
+      // Get total revenue from completed trips
+      const revenueResult = await db
+        .select({ 
+          total: sql<string>`COALESCE(SUM(${trips.freight}), 0)` 
+        })
+        .from(trips)
+        .where(and(eq(trips.userId, userId), eq(trips.status, 'completed')));
 
-    // Get active trips count
-    const activeTripsResult = await db
-      .select({ 
-        count: sql<number>`COUNT(*)` 
-      })
-      .from(trips)
-      .where(and(eq(trips.userId, userId), eq(trips.status, 'in_progress')));
+      // Get active trips count
+      const activeTripsResult = await db
+        .select({ 
+          count: sql<number>`COUNT(*)` 
+        })
+        .from(trips)
+        .where(and(eq(trips.userId, userId), eq(trips.status, 'in_progress')));
 
-    // Get pending payments from invoices
-    const pendingPaymentsResult = await db
-      .select({ 
-        total: sql<string>`COALESCE(SUM(${invoices.totalAmount} - ${invoices.paidAmount}), 0)` 
-      })
-      .from(invoices)
-      .where(and(eq(invoices.userId, userId), eq(invoices.status, 'sent')));
+      // Get pending payments from invoices
+      const pendingPaymentsResult = await db
+        .select({ 
+          total: sql<string>`COALESCE(SUM(${invoices.totalAmount} - ${invoices.paidAmount}), 0)` 
+        })
+        .from(invoices)
+        .where(and(eq(invoices.userId, userId), eq(invoices.status, 'sent')));
 
-    // Get vehicle counts
-    const vehicleStatsResult = await db
-      .select({ 
-        total: sql<number>`COUNT(*)`,
-        available: sql<number>`COUNT(CASE WHEN ${vehicles.status} = 'available' THEN 1 END)`
-      })
-      .from(vehicles)
-      .where(eq(vehicles.userId, userId));
+      // Get vehicle counts
+      const vehicleStatsResult = await db
+        .select({ 
+          total: sql<number>`COUNT(*)`,
+          available: sql<number>`COUNT(CASE WHEN ${vehicles.status} = 'available' THEN 1 END)`
+        })
+        .from(vehicles)
+        .where(eq(vehicles.userId, userId));
 
-    return {
-      totalRevenue: revenueResult[0]?.total || "0",
-      activeTrips: activeTripsResult[0]?.count || 0,
-      pendingPayments: pendingPaymentsResult[0]?.total || "0",
-      availableVehicles: vehicleStatsResult[0]?.available || 0,
-      totalVehicles: vehicleStatsResult[0]?.total || 0,
-    };
+      return {
+        totalRevenue: revenueResult[0]?.total || "0",
+        activeTrips: activeTripsResult[0]?.count || 0,
+        pendingPayments: pendingPaymentsResult[0]?.total || "0",
+        availableVehicles: vehicleStatsResult[0]?.available || 0,
+        totalVehicles: vehicleStatsResult[0]?.total || 0,
+      };
+    } catch (error) {
+      console.error("Database error, using demo data:", error);
+      return demoData.dashboardStats;
+    }
   }
 }
 

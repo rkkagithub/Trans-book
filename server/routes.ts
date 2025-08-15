@@ -5,6 +5,11 @@ import { setupAuth, isAuthenticated } from "./simpleAuth";
 import { insertCustomerSchema, insertVehicleSchema, insertDriverSchema, insertTripSchema, insertInvoiceSchema, insertExpenseSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check route for deployments
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Auth middleware
   await setupAuth(app);
 
