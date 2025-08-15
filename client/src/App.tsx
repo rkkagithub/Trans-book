@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Customers from "@/pages/customers";
+import Login from "@/pages/login";
 import Vehicles from "@/pages/vehicles";
 import Drivers from "@/pages/drivers";
 import Trips from "@/pages/trips";
@@ -20,7 +21,10 @@ function Router() {
   return (
     <Switch>
       {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/login" component={Login} />
+        </>
       ) : (
         <>
           <Route path="/" component={Dashboard} />
