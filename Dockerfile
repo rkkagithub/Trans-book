@@ -1,64 +1,31 @@
-# Multi-stage build for TransBook webapp - Cloud Deployment Ready
-FROM node:20-alpine AS builder
+# Ultra-simple, no-bullshit Dockerfile that just works
+FROM node:20-alpine
 
-# Set working directory
-WORKDIR /app
-
-# Install curl for health checks
+# Install curl
 RUN apk add --no-cache curl
 
-# Copy package files
-COPY package*.json ./
+WORKDIR /app
 
-# Install all dependencies (including dev dependencies for build)
-RUN npm ci
-
-# Copy source code
+# Copy everything
 COPY . .
 
-# Build the application
+# Install all dependencies (no pruning bullshit)
+RUN npm install
+
+# Build
 RUN npm run build
 
-# Production image
-FROM node:20-alpine AS runner
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Set working directory
-WORKDIR /app
-
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S transbook -u 1001
-
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
-
-# Copy other necessary files
-COPY --from=builder /app/drizzle.config.ts ./
-COPY --from=builder /app/shared ./shared
-
-# Change ownership of the app directory
-RUN chown -R transbook:nodejs /app
-USER transbook
-
-# Dynamic port binding for cloud platforms
-EXPOSE $PORT
-
-# Environment variables with cloud-friendly defaults
+# Environment
 ENV NODE_ENV=production
+ENV PORT=10000
 ENV HOST=0.0.0.0
+
+# Expose port
+EXPOSE 10000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-5000}/api/health || exit 1
+  CMD curl -f http://localhost:10000/api/health || exit 1
 
-# Start the application
+# Start
 CMD ["npm", "start"]
