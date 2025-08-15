@@ -40,7 +40,6 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/client/dist ./client/dist
 
 # Copy other necessary files
 COPY --from=builder /app/drizzle.config.ts ./

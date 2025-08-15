@@ -1,4 +1,4 @@
-# Production Dockerfile for Render deployment
+# Simple single-stage Dockerfile for Render deployment
 FROM node:20-alpine
 
 # Install curl for health checks
@@ -10,14 +10,17 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (needed for build)
+RUN npm ci
 
-# Copy application code
+# Copy all application code
 COPY . .
 
 # Build the application
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --production
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
