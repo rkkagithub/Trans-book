@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransBook - Transport Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        },
+                        secondary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857'
+                        },
+                        accent: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- @COMPONENT: MainLayout -->
+    <div class="flex h-screen bg-gray-50">
+        <!-- @COMPONENT: DesktopSidebar -->
+        <aside class="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 z-50">
+            <div class="flex flex-col flex-1 px-6 py-4">
+                <!-- Logo Section -->
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-truck text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900" data-testid="text-app-title">TransBook</h1>
+                        <p class="text-xs text-gray-600">Transport Management</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="flex-1">
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#dashboard" class="bg-primary-50 text-primary-700 border-r-2 border-primary-600 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-dashboard">
+                                <i class="fas fa-chart-pie text-primary-600 mr-3 h-5 w-5"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#customers" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-customers">
+                                <i class="fas fa-users text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Customers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#vehicles" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-vehicles">
+                                <i class="fas fa-truck text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Vehicles
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#drivers" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-drivers">
+                                <i class="fas fa-user-check text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Drivers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#trips" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-trips">
+                                <i class="fas fa-route text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Trips
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#invoices" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-invoices">
+                                <i class="fas fa-file-invoice text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Invoices
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#reports" class="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex items-center px-3 py-3 text-sm font-medium rounded-l-md transition-colors" data-testid="link-reports">
+                                <i class="fas fa-chart-bar text-gray-400 group-hover:text-primary-600 mr-3 h-5 w-5"></i>
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- User Profile & Logout -->
+                <div class="mt-auto space-y-4">
+                    <div class="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
+                        <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900" data-bind="user.name">Rajesh Kumar</p>
+                            <p class="text-xs text-gray-600" data-bind="user.email">rajesh@example.com</p>
+                        </div>
+                    </div>
+                    <button class="w-full flex items-center justify-start px-3 py-3 text-sm font-medium text-gray-700 hover:text-accent-600 hover:bg-accent-50 rounded-md transition-colors" data-testid="button-logout">
+                        <i class="fas fa-sign-out-alt mr-3 h-4 w-4"></i>
+                        Sign out
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- @END_COMPONENT: DesktopSidebar -->
+
+        <!-- @COMPONENT: MobileHeader -->
+        <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-truck text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-lg font-bold text-gray-900" data-testid="text-mobile-app-title">TransBook</h1>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full" data-testid="button-mobile-notifications">
+                            <i class="fas fa-bell text-lg"></i>
+                        </button>
+                        <button class="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full" data-testid="button-mobile-profile">
+                            <i class="fas fa-user text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: MobileHeader -->
+
+        <!-- @COMPONENT: MainContent -->
+        <main class="flex-1 lg:pl-64 flex flex-col min-h-screen pb-16 lg:pb-0">
+            <div class="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+                
+                <!-- @COMPONENT: DashboardHeader -->
+                <div class="mb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                            <p class="mt-1 text-sm text-gray-600">Welcome back! Here's what's happening with your transport business.</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 flex space-x-3">
+                            <button class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <i class="fas fa-download mr-2 text-sm"></i>
+                                Export
+                            </button>
+                            <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2" data-testid="button-add-trip">
+                                <i class="fas fa-plus mr-2 text-sm"></i>
+                                New Trip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DashboardHeader -->
+
+                <!-- @COMPONENT: StatsCards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Revenue Card -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-secondary-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                                <p class="text-2xl font-bold text-gray-900" data-testid="card-total-revenue">₹2,45,680</p>
+                                <p class="text-xs text-secondary-600 flex items-center mt-1">
+                                    <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                    +12.5% from last month
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Trips Card -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-truck text-primary-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Active Trips</p>
+                                <p class="text-2xl font-bold text-gray-900" data-testid="card-active-trips">24</p>
+                                <p class="text-xs text-gray-500 mt-1">8 completed today</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Payments Card -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-accent-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Payments</p>
+                                <p class="text-2xl font-bold text-gray-900" data-testid="card-pending-payments">₹89,450</p>
+                                <p class="text-xs text-accent-600 mt-1">12 overdue invoices</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Vehicles Card -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-gray-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Available Vehicles</p>
+                                <p class="text-2xl font-bold text-gray-900" data-testid="card-available-vehicles">15/18</p>
+                                <p class="text-xs text-gray-500 mt-1">3 in maintenance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: StatsCards -->
+
+                <!-- @COMPONENT: QuickActions -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2">
+                        <!-- @COMPONENT: RecentTrips -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-gray-900">Recent Trips</h3>
+                                    <button class="text-sm text-primary-600 hover:text-primary-700 font-medium">View all</button>
+                                </div>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                <!-- @MAP: recentTrips.map(trip => ( -->
+                                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-route text-primary-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900" data-bind="trip.route">Mumbai → Delhi</p>
+                                                <p class="text-xs text-gray-600" data-bind="trip.customer">ABC Transport Co.</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="trip.amount">₹45,000</p>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800" data-bind="trip.status">
+                                                Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-route text-yellow-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900" data-bind="trip.route">Pune → Bangalore</p>
+                                                <p class="text-xs text-gray-600" data-bind="trip.customer">XYZ Logistics</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="trip.amount">₹32,500</p>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" data-bind="trip.status">
+                                                In Transit
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-route text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900" data-bind="trip.route">Chennai → Kolkata</p>
+                                                <p class="text-xs text-gray-600" data-bind="trip.customer">PQR Industries</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="trip.amount">₹38,200</p>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-bind="trip.status">
+                                                Scheduled
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: RecentTrips -->
+                    </div>
+
+                    <!-- @COMPONENT: QuickActionsPanel -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <button class="w-full flex items-center p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors" data-testid="button-quick-add-customer">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-user-plus text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Add Customer</p>
+                                    <p class="text-sm text-gray-600">Create new customer profile</p>
+                                </div>
+                            </button>
+
+                            <button class="w-full flex items-center p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors" data-testid="button-quick-add-vehicle">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-truck text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Add Vehicle</p>
+                                    <p class="text-sm text-gray-600">Register new vehicle</p>
+                                </div>
+                            </button>
+
+                            <button class="w-full flex items-center p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors" data-testid="button-quick-create-invoice">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-invoice text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Create Invoice</p>
+                                    <p class="text-sm text-gray-600">Generate new invoice</p>
+                                </div>
+                            </button>
+
+                            <button class="w-full flex items-center p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors" data-testid="button-quick-add-driver">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-id-card text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Add Driver</p>
+                                    <p class="text-sm text-gray-600">Register new driver</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: QuickActionsPanel -->
+                </div>
+                <!-- @END_COMPONENT: QuickActions -->
+
+                <!-- @COMPONENT: PaymentSummary -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- @COMPONENT: PendingPayments -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium text-gray-900">Pending Payments</h3>
+                                <span class="text-sm bg-accent-100 text-accent-800 px-2 py-1 rounded-full">12 Overdue</span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-200 max-h-80 overflow-y-auto">
+                            <!-- @MAP: pendingPayments.map(payment => ( -->
+                            <div class="px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900" data-bind="payment.customer">ABC Transport Co.</p>
+                                        <p class="text-xs text-gray-600" data-bind="payment.invoiceNumber">Invoice #INV-2024-001</p>
+                                        <p class="text-xs text-accent-600" data-bind="payment.dueDate">Due: 15 days ago</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900" data-bind="payment.amount">₹25,400</p>
+                                        <button class="text-xs text-primary-600 hover:text-primary-700 font-medium">Follow Up</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900" data-bind="payment.customer">XYZ Logistics</p>
+                                        <p class="text-xs text-gray-600" data-bind="payment.invoiceNumber">Invoice #INV-2024-002</p>
+                                        <p class="text-xs text-yellow-600" data-bind="payment.dueDate">Due: 3 days ago</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900" data-bind="payment.amount">₹18,750</p>
+                                        <button class="text-xs text-primary-600 hover:text-primary-700 font-medium">Follow Up</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: PendingPayments -->
+
+                    <!-- @COMPONENT: ExpenseSummary -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Monthly Expenses</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-gas-pump text-red-600 text-sm"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">Fuel</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900">₹45,600</p>
+                                        <div class="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-red-600 h-2 rounded-full" style="width: 65%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-tools text-blue-600 text-sm"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">Maintenance</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900">₹12,400</p>
+                                        <div class="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-road text-green-600 text-sm"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">Tolls</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900">₹8,200</p>
+                                        <div class="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-green-600 h-2 rounded-full" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-certificate text-yellow-600 text-sm"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">Insurance</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900">₹15,000</p>
+                                        <div class="w-20 bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-yellow-600 h-2 rounded-full" style="width: 42%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 pt-4 border-t border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-900">Total Expenses</span>
+                                    <span class="text-lg font-bold text-gray-900">₹81,200</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: ExpenseSummary -->
+                </div>
+                <!-- @END_COMPONENT: PaymentSummary -->
+
+                <!-- @COMPONENT: CustomerManagementSection -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Customer Management</h3>
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                                <i class="fas fa-plus mr-2 text-sm"></i>
+                                Add Customer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- @COMPONENT: SearchAndFilters -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Search customers..." data-testid="input-search-customers">
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md" data-testid="select-customer-filter">
+                                    <option value="">All Customers</option>
+                                    <option value="active">Active</option>
+                                    <option value="pending">Pending Payment</option>
+                                    <option value="overdue">Overdue</option>
+                                </select>
+                                <button class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    <i class="fas fa-filter mr-2 text-sm"></i>
+                                    Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: SearchAndFilters -->
+
+                    <!-- @COMPONENT: CustomersTable -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Outstanding</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credit Limit</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- @MAP: customers.map(customer => ( -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-building text-gray-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900" data-bind="customer.name">ABC Transport Co.</div>
+                                                <div class="text-sm text-gray-500" data-bind="customer.gstin">GSTIN: 27AABCU9603R1ZX</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900" data-bind="customer.phone">+91 98765 43210</div>
+                                        <div class="text-sm text-gray-500" data-bind="customer.email">contact@abctransport.com</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900" data-bind="customer.outstanding">₹25,400</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900" data-bind="customer.creditLimit">₹50,000</div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-yellow-600 h-2 rounded-full" style="width: 51%"></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" data-bind="customer.status">
+                                            Payment Due
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex justify-end space-x-2">
+                                            <button class="text-primary-600 hover:text-primary-900">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="text-secondary-600 hover:text-secondary-900">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-accent-600 hover:text-accent-900">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- @END_MAP )) -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- @END_COMPONENT: CustomersTable -->
+                </div>
+                <!-- @END_COMPONENT: CustomerManagementSection -->
+
+            </div>
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+
+        <!-- @COMPONENT: MobileBottomNav -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+            <div class="grid grid-cols-5">
+                <a href="#dashboard" class="flex flex-col items-center py-2 px-3 text-xs font-medium text-primary-600 bg-primary-50" data-testid="mobile-nav-dashboard">
+                    <i class="fas fa-chart-pie h-5 w-5 mb-1 text-primary-600"></i>
+                    <span class="truncate">Dashboard</span>
+                </a>
+                <a href="#customers" class="flex flex-col items-center py-2 px-3 text-xs font-medium text-gray-600 hover:text-primary-600" data-testid="mobile-nav-customers">
+                    <i class="fas fa-users h-5 w-5 mb-1 text-gray-400"></i>
+                    <span class="truncate">Customers</span>
+                </a>
+                <a href="#vehicles" class="flex flex-col items-center py-2 px-3 text-xs font-medium text-gray-600 hover:text-primary-600" data-testid="mobile-nav-vehicles">
+                    <i class="fas fa-truck h-5 w-5 mb-1 text-gray-400"></i>
+                    <span class="truncate">Vehicles</span>
+                </a>
+                <a href="#invoices" class="flex flex-col items-center py-2 px-3 text-xs font-medium text-gray-600 hover:text-primary-600" data-testid="mobile-nav-invoices">
+                    <i class="fas fa-file-invoice h-5 w-5 mb-1 text-gray-400"></i>
+                    <span class="truncate">Invoices</span>
+                </a>
+                <a href="#reports" class="flex flex-col items-center py-2 px-3 text-xs font-medium text-gray-600 hover:text-primary-600" data-testid="mobile-nav-reports">
+                    <i class="fas fa-chart-bar h-5 w-5 mb-1 text-gray-400"></i>
+                    <span class="truncate">Reports</span>
+                </a>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: MobileBottomNav -->
+    </div>
+    <!-- @END_COMPONENT: MainLayout -->
+
+    <!-- @COMPONENT: Modal Template for Forms -->
+    <div id="modal-overlay" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden" data-implementation="Modal system for forms">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <!-- Modal content will be dynamically populated -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modal-title">Modal Title</h3>
+                    <button class="text-gray-400 hover:text-gray-600" onclick="closeModal()">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="modal-content" class="mb-4">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Modal Template -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        (function() {
+            'use strict';
+            
+            // Modal functionality
+            function openModal(title, content) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-content').innerHTML = content;
+                document.getElementById('modal-overlay').classList.remove('hidden');
+            }
+            
+            function closeModal() {
+                document.getElementById('modal-overlay').classList.add('hidden');
+            }
+            
+            // Make functions globally available
+            window.openModal = openModal;
+            window.closeModal = closeModal;
+            
+            // Close modal on outside click
+            document.getElementById('modal-overlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // Navigation active state management
+            const navLinks = document.querySelectorAll('a[href^="#"]');
+            const mobileNavLinks = document.querySelectorAll('[data-testid^="mobile-nav"]');
+            
+            // Simulate navigation state changes
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update desktop nav
+                    navLinks.forEach(nl => {
+                        nl.classList.remove('bg-primary-50', 'text-primary-700', 'border-r-2', 'border-primary-600');
+                        nl.classList.add('text-gray-700', 'hover:text-primary-600', 'hover:bg-gray-50');
+                        const icon = nl.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('text-primary-600');
+                            icon.classList.add('text-gray-400', 'group-hover:text-primary-600');
+                        }
+                    });
+                    
+                    this.classList.add('bg-primary-50', 'text-primary-700', 'border-r-2', 'border-primary-600');
+                    this.classList.remove('text-gray-700', 'hover:text-primary-600', 'hover:bg-gray-50');
+                    const activeIcon = this.querySelector('i');
+                    if (activeIcon) {
+                        activeIcon.classList.add('text-primary-600');
+                        activeIcon.classList.remove('text-gray-400', 'group-hover:text-primary-600');
+                    }
+                });
+            });
+            
+            // Search functionality placeholder
+            const searchInput = document.querySelector('[data-testid="input-search-customers"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    // TODO: Implement search functionality
+                    console.log('Searching for:', this.value);
+                });
+            }
+            
+            // Filter functionality placeholder
+            const filterSelect = document.querySelector('[data-testid="select-customer-filter"]');
+            if (filterSelect) {
+                filterSelect.addEventListener('change', function() {
+                    // TODO: Implement filter functionality
+                    console.log('Filter changed to:', this.value);
+                });
+            }
+            
+        })();
+    </script>
+</body>
+</html>
