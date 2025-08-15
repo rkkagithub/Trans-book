@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./simpleAuth";
 import { insertCustomerSchema, insertVehicleSchema, insertDriverSchema, insertTripSchema, insertInvoiceSchema, insertExpenseSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -9,21 +9,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth route is handled in simpleAuth.ts
 
   // Dashboard routes
   app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const stats = await storage.getDashboardStats(userId);
       res.json(stats);
     } catch (error) {
@@ -35,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Customer routes
   app.get('/api/customers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const customers = await storage.getCustomers(userId);
       res.json(customers);
     } catch (error) {
@@ -46,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/customers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const customer = await storage.getCustomer(req.params.id, userId);
       if (!customer) {
         return res.status(404).json({ message: "Customer not found" });
@@ -60,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/customers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertCustomerSchema.parse(req.body);
       const customer = await storage.createCustomer(validatedData, userId);
       res.status(201).json(customer);
@@ -72,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/customers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertCustomerSchema.partial().parse(req.body);
       const customer = await storage.updateCustomer(req.params.id, validatedData, userId);
       res.json(customer);
@@ -84,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/customers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteCustomer(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
@@ -96,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Vehicle routes
   app.get('/api/vehicles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const vehicles = await storage.getVehicles(userId);
       res.json(vehicles);
     } catch (error) {
@@ -107,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/vehicles/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const vehicle = await storage.getVehicle(req.params.id, userId);
       if (!vehicle) {
         return res.status(404).json({ message: "Vehicle not found" });
@@ -121,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/vehicles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertVehicleSchema.parse(req.body);
       const vehicle = await storage.createVehicle(validatedData, userId);
       res.status(201).json(vehicle);
@@ -133,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/vehicles/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertVehicleSchema.partial().parse(req.body);
       const vehicle = await storage.updateVehicle(req.params.id, validatedData, userId);
       res.json(vehicle);
@@ -145,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/vehicles/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteVehicle(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
@@ -157,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Driver routes
   app.get('/api/drivers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const drivers = await storage.getDrivers(userId);
       res.json(drivers);
     } catch (error) {
@@ -168,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/drivers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const driver = await storage.getDriver(req.params.id, userId);
       if (!driver) {
         return res.status(404).json({ message: "Driver not found" });
@@ -182,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/drivers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertDriverSchema.parse(req.body);
       const driver = await storage.createDriver(validatedData, userId);
       res.status(201).json(driver);
@@ -194,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/drivers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertDriverSchema.partial().parse(req.body);
       const driver = await storage.updateDriver(req.params.id, validatedData, userId);
       res.json(driver);
@@ -206,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/drivers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteDriver(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
@@ -218,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Trip routes
   app.get('/api/trips', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const trips = await storage.getTrips(userId);
       res.json(trips);
     } catch (error) {
@@ -229,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/trips/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const trip = await storage.getTrip(req.params.id, userId);
       if (!trip) {
         return res.status(404).json({ message: "Trip not found" });
@@ -243,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/trips', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertTripSchema.parse(req.body);
       const trip = await storage.createTrip(validatedData, userId);
       res.status(201).json(trip);
@@ -255,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/trips/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertTripSchema.partial().parse(req.body);
       const trip = await storage.updateTrip(req.params.id, validatedData, userId);
       res.json(trip);
@@ -267,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/trips/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteTrip(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
@@ -279,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Invoice routes
   app.get('/api/invoices', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const invoices = await storage.getInvoices(userId);
       res.json(invoices);
     } catch (error) {
@@ -290,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/invoices/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const invoice = await storage.getInvoice(req.params.id, userId);
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
@@ -304,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/invoices', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertInvoiceSchema.parse(req.body);
       const invoice = await storage.createInvoice(validatedData, userId);
       res.status(201).json(invoice);
@@ -316,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/invoices/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertInvoiceSchema.partial().parse(req.body);
       const invoice = await storage.updateInvoice(req.params.id, validatedData, userId);
       res.json(invoice);
@@ -328,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/invoices/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteInvoice(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
@@ -340,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense routes
   app.get('/api/expenses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const expenses = await storage.getExpenses(userId);
       res.json(expenses);
     } catch (error) {
@@ -351,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/expenses/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const expense = await storage.getExpense(req.params.id, userId);
       if (!expense) {
         return res.status(404).json({ message: "Expense not found" });
@@ -365,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/expenses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertExpenseSchema.parse(req.body);
       const expense = await storage.createExpense(validatedData, userId);
       res.status(201).json(expense);
@@ -377,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/expenses/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const validatedData = insertExpenseSchema.partial().parse(req.body);
       const expense = await storage.updateExpense(req.params.id, validatedData, userId);
       res.json(expense);
@@ -389,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/expenses/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       await storage.deleteExpense(req.params.id, userId);
       res.status(204).send();
     } catch (error) {
